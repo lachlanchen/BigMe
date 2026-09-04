@@ -1,19 +1,15 @@
 # BigMe
 BigMe device connection and file sync workspace
 
-## Current Device
+## Connect a device
 
-macOS sees the connected device over USB as:
+Keep device serial numbers, local IP addresses, MAC addresses, and ADB pairing
+codes in local operator notes rather than committed documentation. Discover the
+currently connected device when needed:
 
-- Product: `k65v1_64_bsp`
-- Vendor: MediaTek / `0x0e8d`
-- Serial: `INCPQ130A234L46003381`
-- Manufacturer: `alps`
-
-The BigMe was also reported on Wi-Fi as:
-
-- IP: `172.20.10.9`
-- MAC from ARP: `9a:ad:2d:b4:62:55`
+```bash
+adb devices -l
+```
 
 Android platform tools are installed locally, including `adb`.
 OpenMTP is installed locally at `/Applications/OpenMTP.app` for GUI USB file
@@ -28,15 +24,15 @@ If the device offers Android 11+ Wireless debugging, pair it from the BigMe
 Developer options screen first:
 
 ```bash
-adb pair 172.20.10.9:<pairing-port>
-adb connect 172.20.10.9:<adb-port>
+adb pair <device-ip>:<pairing-port>
+adb connect <device-ip>:<adb-port>
 ```
 
 If USB debugging is authorized, this helper can switch the device to classic
 ADB-over-Wi-Fi on port `5555`:
 
 ```bash
-./tools/enable-wifi-adb.sh
+./tools/enable-wifi-adb.sh <device-ip>
 ```
 
 ## Commands
@@ -45,6 +41,7 @@ Check connection:
 
 ```bash
 ./tools/bigme-status.sh
+./tools/bigme-status.sh <device-ip>  # also probe the local network route
 ```
 
 Sync a file or folder to the BigMe:

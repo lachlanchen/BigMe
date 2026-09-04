@@ -1,25 +1,34 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+device_ip="${1:-}"
+
 echo "USB devices matching likely BigMe/MediaTek entries:"
 system_profiler SPUSBDataType 2>/dev/null | awk '
-  /k65v1_64_bsp|MediaTek|Serial Number: INCPQ130A234L46003381/ { show=1 }
+  /k65v1_64_bsp|MediaTek/ { show=1 }
   show { print }
   show && /^$/ { show=0 }
 '
 
-echo
-echo "Network reachability for 172.20.10.9:"
-ping -c 1 -W 1000 172.20.10.9 >/dev/null 2>&1 && echo "ping: reachable" || echo "ping: not reachable"
-arp -n 172.20.10.9 2>/dev/null || true
+if [[ -n "$device_ip" ]]; then
+  echo
+  echo "Network reachability for the supplied device address:"
+  ping -c 1 -W 1000 "$device_ip" >/dev/null 2>&1 \
+    && echo "ping: reachable" \
+    || echo "ping: not reachable"
+  arp -n "$device_ip" 2>/dev/null || true
 
-echo
-echo "Common control ports:"
-for port in 22 5555 8022; do
-  nc -vz -G 1 172.20.10.9 "$port" >/dev/null 2>&1 \
-    && echo "$port: open" \
-    || echo "$port: closed/refused/unreachable"
-done
+  echo
+  echo "Common control ports:"
+  for port in 22 5555 8022; do
+    nc -vz -G 1 "$device_ip" "$port" >/dev/null 2>&1 \
+      && echo "$port: open" \
+      || echo "$port: closed/refused/unreachable"
+  done
+else
+  echo
+  echo "Network probe skipped. Pass the current device IP as the first argument to enable it."
+fi
 
 echo
 echo "ADB version:"
